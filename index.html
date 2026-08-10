@@ -1,0 +1,1404 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050505">
+
+  <title>AI Фото — нейрофотографии нового поколения</title>
+  <meta name="description" content="Создание реалистичных AI-фотографий, реставрация снимков и уникальные фотосессии.">
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600&display=swap");
+
+    :root {
+      --black: #050505;
+      --panel: #0c0b09;
+      --panel-light: #15120d;
+      --gold: #eaa63b;
+      --gold-light: #ffd17a;
+      --gold-dark: #7c4c0d;
+      --text: #f7f2e9;
+      --muted: #bbb4a9;
+      --border: rgba(234, 166, 59, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      overflow-x: hidden;
+      color: var(--text);
+      font-family: "Montserrat", sans-serif;
+      line-height: 1.6;
+      background:
+        radial-gradient(circle at 85% 10%, rgba(234, 166, 59, 0.11), transparent 28rem),
+        radial-gradient(circle at 10% 45%, rgba(70, 112, 170, 0.08), transparent 25rem),
+        var(--black);
+    }
+
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      opacity: 0.25;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 38px 38px;
+      pointer-events: none;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin-inline: auto;
+    }
+
+    .gold-text {
+      color: var(--gold);
+    }
+
+    .eyebrow {
+      color: var(--gold-light);
+      font-size: 0.75rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    .header {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      border-bottom: 1px solid rgba(234, 166, 59, 0.22);
+      background: rgba(5, 5, 5, 0.86);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .logo {
+      color: var(--gold-light);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .logo span {
+      color: var(--gold);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      color: #d1cbc2;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-links a {
+      transition: color 0.25s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--gold-light);
+    }
+
+    .nav-button,
+    .primary-button,
+    .secondary-button {
+      border: 1px solid var(--gold);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .nav-button {
+      padding: 10px 18px;
+      color: #130d05;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    }
+
+    .menu-button {
+      display: none;
+      width: 44px;
+      height: 44px;
+      color: var(--gold-light);
+      font-size: 1.4rem;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: transparent;
+    }
+
+    .hero {
+      min-height: 760px;
+      display: grid;
+      position: relative;
+      align-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(234, 166, 59, 0.2);
+      background:
+        linear-gradient(90deg, #050505 5%, rgba(5,5,5,0.94) 37%, rgba(5,5,5,0.25) 70%),
+        linear-gradient(0deg, #050505 0%, transparent 30%),
+        url("https://images.unsplash.com/photo-1554080353-a576cf803bda?auto=format&fit=crop&w=1800&q=88")
+        center 34% / cover no-repeat;
+    }
+
+    .hero::after {
+      position: absolute;
+      right: 5%;
+      bottom: 8%;
+      width: 240px;
+      height: 240px;
+      content: "";
+      border: 1px solid rgba(234, 166, 59, 0.18);
+      border-radius: 50%;
+      box-shadow:
+        0 0 80px rgba(234, 166, 59, 0.12),
+        inset 0 0 70px rgba(234, 166, 59, 0.08);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 660px;
+      padding: 120px 0 100px;
+      animation: reveal 0.9s ease both;
+    }
+
+    .hero h1 {
+      margin: 14px 0 22px;
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(3.5rem, 7vw, 7rem);
+      font-weight: 600;
+      line-height: 0.82;
+      letter-spacing: 0.015em;
+      text-transform: uppercase;
+      text-shadow: 0 3px 30px #000;
+    }
+
+    .hero h1 span {
+      display: block;
+      color: var(--gold-light);
+    }
+
+    .hero-description {
+      max-width: 520px;
+      color: #ded8ce;
+      font-size: 1.05rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 34px;
+    }
+
+    .primary-button,
+    .secondary-button {
+      display: inline-flex;
+      min-height: 52px;
+      padding: 0 24px;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .primary-button {
+      color: #160e04;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      box-shadow: 0 10px 40px rgba(234, 166, 59, 0.18);
+    }
+
+    .secondary-button {
+      color: var(--gold-light);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .primary-button:hover,
+    .nav-button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.12);
+    }
+
+    .secondary-button:hover {
+      color: #120c04;
+      background: var(--gold-light);
+      transform: translateY(-2px);
+    }
+
+    .benefits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 22px;
+      margin-top: 45px;
+    }
+
+    .benefit {
+      padding-right: 22px;
+      border-right: 1px solid rgba(234, 166, 59, 0.3);
+    }
+
+    .benefit:last-child {
+      border-right: 0;
+    }
+
+    .benefit strong {
+      display: block;
+      color: var(--gold-light);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.45rem;
+    }
+
+    .benefit small {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    section {
+      padding: 92px 0;
+    }
+
+    .section-heading {
+      max-width: 700px;
+      margin: 0 auto 46px;
+      text-align: center;
+    }
+
+    .section-heading h2 {
+      margin: 6px 0 10px;
+      color: var(--gold-light);
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.3rem, 5vw, 4.1rem);
+      font-weight: 600;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .section-heading p {
+      color: var(--muted);
+    }
+
+    .divider {
+      display: flex;
+      margin: 12px auto 0;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--gold);
+    }
+
+    .divider::before,
+    .divider::after {
+      width: 70px;
+      height: 1px;
+      content: "";
+      background: linear-gradient(90deg, transparent, var(--gold));
+    }
+
+    .divider::after {
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .service-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 440px;
+      display: flex;
+      padding: 24px;
+      align-items: flex-end;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--panel);
+      isolation: isolate;
+    }
+
+    .service-card img {
+      position: absolute;
+      z-index: -2;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.7s ease;
+    }
+
+    .service-card::after {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      background: linear-gradient(0deg, #050505 5%, rgba(5,5,5,0.88) 28%, transparent 72%);
+    }
+
+    .service-card:hover img {
+      transform: scale(1.07);
+    }
+
+    .service-number {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      color: rgba(255, 209, 122, 0.65);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 2rem;
+    }
+
+    .service-card h3 {
+      color: var(--gold-light);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.65rem;
+      line-height: 1;
+    }
+
+    .service-card p {
+      margin-top: 8px;
+      color: #c9c3b9;
+      font-size: 0.8rem;
+    }
+
+    .promo {
+      padding-top: 0;
+    }
+
+    .promo-box {
+      display: grid;
+      overflow: hidden;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 100% 50%, rgba(234,166,59,0.12), transparent 50%),
+        var(--panel);
+    }
+
+    .promo-image {
+      min-height: 460px;
+      background:
+        linear-gradient(90deg, transparent, var(--panel)),
+        url("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=85")
+        center / cover;
+    }
+
+    .promo-content {
+      padding: 54px;
+      align-self: center;
+    }
+
+    .promo-content h2 {
+      margin: 8px 0 16px;
+      color: var(--gold-light);
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      line-height: 0.95;
+    }
+
+    .promo-content p {
+      margin-bottom: 26px;
+      color: var(--muted);
+    }
+
+    .check-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 32px;
+      list-style: none;
+    }
+
+    .check-list li::before {
+      margin-right: 10px;
+      color: var(--gold);
+      content: "✦";
+    }
+
+    .prices {
+      border-block: 1px solid rgba(234,166,59,0.17);
+      background: rgba(255,255,255,0.012);
+    }
+
+    .price-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .price-card {
+      position: relative;
+      padding: 38px 26px;
+      text-align: center;
+      border: 1px solid rgba(234,166,59,0.35);
+      border-radius: 20px;
+      background: linear-gradient(145deg, #12100d, #080808);
+      transition: 0.3s ease;
+    }
+
+    .price-card.featured {
+      border-color: var(--gold);
+      box-shadow: 0 0 45px rgba(234,166,59,0.12);
+      transform: translateY(-10px);
+    }
+
+    .tag {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      padding: 5px 14px;
+      color: #160e04;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      border-radius: 99px;
+      background: var(--gold-light);
+      transform: translateX(-50%);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .price-card h3 {
+      color: var(--gold-light);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.7rem;
+      text-transform: uppercase;
+    }
+
+    .price {
+      margin: 20px 0;
+      color: var(--gold);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 3.5rem;
+      line-height: 1;
+    }
+
+    .price-card ul {
+      min-height: 130px;
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      list-style: none;
+    }
+
+    .price-card .primary-button {
+      width: 100%;
+      margin-top: 25px;
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr 0.8fr;
+      grid-auto-rows: 230px;
+      gap: 16px;
+    }
+
+    .portfolio-item {
+      overflow: hidden;
+      border: 1px solid rgba(234,166,59,0.4);
+      border-radius: 18px;
+    }
+
+    .portfolio-item:first-child {
+      grid-row: span 2;
+    }
+
+    .portfolio-item img {
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease, filter 0.6s ease;
+    }
+
+    .portfolio-item:hover img {
+      transform: scale(1.06);
+      filter: contrast(1.08) saturate(1.12);
+    }
+
+    .reviews {
+      padding-top: 0;
+    }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .review {
+      padding: 28px;
+      border: 1px solid rgba(234,166,59,0.35);
+      border-radius: 18px;
+      background: linear-gradient(145deg, #11100e, #080808);
+    }
+
+    .review-head {
+      display: flex;
+      margin-bottom: 18px;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .review img {
+      width: 54px;
+      height: 54px;
+      border: 1px solid var(--gold);
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .review h3 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.4rem;
+    }
+
+    .review p {
+      color: var(--muted);
+      font-size: 0.87rem;
+    }
+
+    .stars {
+      margin-top: 16px;
+      color: var(--gold);
+      letter-spacing: 0.2em;
+    }
+
+    .contact {
+      padding-top: 0;
+    }
+
+    .contact-box {
+      display: grid;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 40px;
+      padding: 54px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 0 0, rgba(234,166,59,0.13), transparent 45%),
+        var(--panel);
+    }
+
+    .contact-copy h2 {
+      margin: 8px 0 16px;
+      color: var(--gold-light);
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      line-height: 0.95;
+    }
+
+    .contact-copy p {
+      color: var(--muted);
+    }
+
+    .contact-details {
+      display: grid;
+      gap: 12px;
+      margin-top: 28px;
+      color: var(--gold-light);
+    }
+
+    .form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form input,
+    .form select,
+    .form textarea {
+      width: 100%;
+      color: var(--text);
+      border: 1px solid rgba(234,166,59,0.3);
+      border-radius: 12px;
+      outline: none;
+      background: #080807;
+    }
+
+    .form input,
+    .form select {
+      height: 52px;
+      padding: 0 16px;
+    }
+
+    .form textarea {
+      min-height: 120px;
+      padding: 16px;
+      resize: vertical;
+    }
+
+    .form input:focus,
+    .form select:focus,
+    .form textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(234,166,59,0.08);
+    }
+
+    .form select option {
+      background: #080807;
+    }
+
+    .form-message {
+      min-height: 24px;
+      color: var(--gold-light);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .footer {
+      padding: 30px 0;
+      color: #8e887f;
+      border-top: 1px solid rgba(234,166,59,0.17);
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes reveal {
+      from {
+        opacity: 0;
+        transform: translateY(25px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .menu-button {
+        display: block;
+      }
+
+      .nav-links {
+        position: absolute;
+        top: 72px;
+        right: 16px;
+        left: 16px;
+        display: none;
+        padding: 24px;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 18px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: rgba(8, 8, 8, 0.98);
+      }
+
+      .nav-links.open {
+        display: flex;
+      }
+
+      .nav-button {
+        text-align: center;
+      }
+
+      .hero {
+        min-height: 720px;
+        background-position: 62% center;
+      }
+
+      .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .promo-box,
+      .contact-box {
+        grid-template-columns: 1fr;
+      }
+
+      .promo-image {
+        min-height: 380px;
+      }
+
+      .price-grid,
+      .reviews-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .price-card.featured {
+        transform: none;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .container {
+        width: min(100% - 22px, 1180px);
+      }
+
+      section {
+        padding: 70px 0;
+      }
+
+      .hero {
+        min-height: 740px;
+        align-items: end;
+        background:
+          linear-gradient(0deg, #050505 12%, rgba(5,5,5,0.65) 58%, rgba(5,5,5,0.15)),
+          url("https://images.unsplash.com/photo-1554080353-a576cf803bda?auto=format&fit=crop&w=1000&q=85")
+          62% center / cover;
+      }
+
+      .hero-content {
+        padding: 210px 0 72px;
+      }
+
+      .hero h1 {
+        font-size: clamp(3.25rem, 17vw, 5rem);
+      }
+
+      .hero-description {
+        font-size: 0.9rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .primary-button,
+      .secondary-button {
+        width: 100%;
+      }
+
+      .benefits {
+        gap: 14px;
+      }
+
+      .benefit {
+        width: calc(50% - 8px);
+        border-right: 0;
+      }
+
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .service-card {
+        min-height: 420px;
+      }
+
+      .promo-content,
+      .contact-box {
+        padding: 30px 20px;
+      }
+
+      .promo-image {
+        min-height: 300px;
+      }
+
+      .portfolio-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: 190px;
+      }
+
+      .portfolio-item:first-child {
+        grid-column: span 2;
+        grid-row: auto;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }css
+.contact {
+  padding-top: 0;
+}
+
+.contact-card {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 56px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      rgba(234, 166, 59, 0.16),
+      transparent 55%
+    ),
+    var(--panel);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+}
+
+.contact-card h2 {
+  margin: 8px 0 14px;
+  color: var(--gold-light);
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.contact-description {
+  max-width: 590px;
+  margin: 0 auto 32px;
+  color: var(--muted);
+}
+
+.contact-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.contact-item {
+  min-height: 116px;
+  display: flex;
+  padding: 22px;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  border: 1px solid rgba(234, 166, 59, 0.35);
+  border-radius: 16px;
+  background: #080807;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.contact-item:hover {
+  border-color: var(--gold);
+  background: var(--panel-light);
+  transform: translateY(-3px);
+}
+
+.contact-icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  flex: 0 0 50px;
+  place-items: center;
+  color: #170e04;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--gold-light),
+    var(--gold)
+  );
+}
+
+.contact-item small,
+.contact-item strong {
+  display: block;
+}
+
+.contact-item small {
+  margin-bottom: 3px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contact-item strong {
+  color: var(--gold-light);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.contact-owner {
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.contact-owner strong {
+  color: var(--gold-light);
+}
+
+@media (max-width: 620px) {
+  .contact-card {
+    padding: 38px 18px;
+  }
+
+  .contact-list {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-item {
+    min-height: 100px;
+    padding: 18px;
+  }
+
+  .contact-item strong {
+    font-size: 0.9rem;
+  }
+}
+
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="container nav">
+      <a class="logo" href="#home">AI<span>·</span>FOTO</a>
+
+      <button class="menu-button" id="menuButton" aria-label="Открыть меню">☰</button>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#services">Услуги</a>
+        <a href="#prices">Цены</a>
+        <a href="#portfolio">Портфолио</a>
+        <a href="#reviews">Отзывы</a>
+        <a class="nav-button" href="#contact">Заказать фото</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="container">
+        <div class="hero-content">
+          <p class="eyebrow">Нейрофотография нового поколения</p>
+
+          <h1>
+            Реальность
+            <span>в деталях</span>
+          </h1>
+
+          <p class="hero-description">
+            Создаём эффектные AI-фотографии, которые выглядят как настоящая
+            профессиональная съёмка. Без студии, дорогой техники и долгого ожидания.
+          </p>
+
+          <div class="hero-actions">
+            <a class="primary-button" href="#contact">Заказать фотосессию</a>
+            <a class="secondary-button" href="#portfolio">Смотреть работы</a>
+          </div>
+
+          <div class="benefits">
+            <div class="benefit">
+              <strong>3 фото</strong>
+              <small>первые бесплатно</small>
+            </div>
+
+            <div class="benefit">
+              <strong>30 минут</strong>
+              <small>быстрый результат</small>
+            </div>
+
+            <div class="benefit">
+              <strong>4K</strong>
+              <small>высокое качество</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="services">
+      <div class="container">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Выберите своё направление</p>
+          <h2>Наши услуги</h2>
+          <p>От реалистичного портрета до фантастического мира — создадим ваш уникальный образ.</p>
+          <div class="divider">✦</div>
+        </div>
+
+        <div class="services-grid">
+          <article class="service-card reveal">
+            <img
+              src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85"
+              alt="Женский портрет"
+            >
+            <span class="service-number">01</span>
+            <div>
+              <h3>Любые образы</h3>
+              <p>От строгой классики до героя фантастического фильма.</p>
+            </div>
+          </article>
+
+          <article class="service-card reveal">
+            <img
+              src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=800&q=85"
+              alt="Космический пейзаж"
+            >
+            <span class="service-number">02</span>
+            <div>
+              <h3>Любые локации</h3>
+              <p>Мегаполис, пустыня, космос или сказочный дворец.</p>
+            </div>
+          </article>
+
+          <article class="service-card reveal">
+            <img
+              src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=85"
+              alt="Фотосессия на природе"
+            >
+            <span class="service-number">03</span>
+            <div>
+              <h3>AI-фотосессии</h3>
+              <p>Индивидуальные тематические и креативные съёмки.</p>
+            </div>
+          </article>
+
+          <article class="service-card reveal">
+            <img
+              src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=85"
+              alt="Студийная фотосессия"
+            >
+            <span class="service-number">04</span>
+            <div>
+              <h3>Ultra Cinema</h3>
+              <p>Кинематографический свет, атмосфера и премиальная обработка.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="promo">
+      <div class="container">
+        <div class="promo-box reveal">
+          <div class="promo-image" role="img" aria-label="Реставрация портрета"></div>
+
+          <div class="promo-content">
+            <p class="eyebrow">Вернём воспоминания к жизни</p>
+            <h2>Реставрация старых фотографий</h2>
+            <p>
+              Восстановим повреждённые семейные снимки, улучшим качество
+              и при желании добавим естественные цвета.
+            </p>
+
+            <ul class="check-list">
+              <li>Удаление царапин и дефектов</li>
+              <li>Улучшение лиц и мелких деталей</li>
+              <li>Колоризация чёрно-белых фотографий</li>
+            </ul>
+
+            <a class="primary-button" href="#contact">Восстановить фото</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="prices" id="prices">
+      <div class="container">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Просто и прозрачно</p>
+          <h2>Пакеты и цены</h2>
+          <p>Выберите подходящий вариант. Перед началом мы согласуем образ и детали.</p>
+          <div class="divider">✦</div>
+        </div>
+
+        <div class="price-grid">
+          <article class="price-card reveal">
+            <h3>Базовый</h3>
+            <div class="price">300 ₽</div>
+            <ul>
+              <li>3 нейрофотографии</li>
+              <li>1 выбранный образ</li>
+              <li>Готовность до 30 минут</li>
+              <li>JPG высокого качества</li>
+            </ul>
+            <a class="primary-button order-button" href="#contact" data-package="Базовый">Выбрать</a>
+          </article>
+
+          <article class="price-card featured reveal">
+            <span class="tag">Популярный</span>
+            <h3>VIP Collection</h3>
+            <div class="price">500 ₽</div>
+            <ul>
+              <li>5 нейрофотографий</li>
+              <li>2 уникальных образа</li>
+              <li>Детальная обработка</li>
+              <li>Приоритетное создание</li>
+            </ul>
+            <a class="primary-button order-button" href="#contact" data-package="VIP Collection">Выбрать</a>
+          </article>
+
+          <article class="price-card reveal">
+            <h3>Ultra Cinema</h3>
+            <div class="price">600 ₽</div>
+            <ul>
+              <li>10 нейрофотографий</li>
+              <li>3 кинематографичных образа</li>
+              <li>Максимальная детализация</li>
+              <li>Форматы для соцсетей</li>
+            </ul>
+            <a class="primary-button order-button" href="#contact" data-package="Ultra Cinema">Выбрать</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="portfolio">
+      <div class="container">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Вдохновение без границ</p>
+          <h2>Портфолио</h2>
+          <div class="divider">✦</div>
+        </div>
+
+        <div class="portfolio-grid">
+          <div class="portfolio-item reveal">
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=85"
+              alt="AI-портрет девушки"
+            >
+          </div>
+
+          <div class="portfolio-item reveal">
+            <img
+              src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=700&q=85"
+              alt="Мужской портрет"
+            >
+          </div>
+
+          <div class="portfolio-item reveal">
+            <img
+              src="https://images.unsplash.com/photo-1496440737103-cd596325d314?auto=format&fit=crop&w=700&q=85"
+              alt="Женский портрет"
+            >
+          </div>
+
+          <div class="portfolio-item reveal">
+            <img
+              src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=700&q=85"
+              alt="Деловой портрет"
+            >
+          </div>
+
+          <div class="portfolio-item reveal">
+            <img
+              src="https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=700&q=85"
+              alt="Студийный портрет"
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="reviews" id="reviews">
+      <div class="container">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Нам доверяют</p>
+          <h2>Отзывы клиентов</h2>
+          <div class="divider">✦</div>
+        </div>
+
+        <div class="reviews-grid">
+          <article class="review reveal">
+            <div class="review-head">
+              <img
+                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80"
+                alt="Анна"
+              >
+              <div>
+                <h3>Анна П.</h3>
+                <small>VIP Collection</small>
+              </div>
+            </div>
+            <p>
+              Фотографии превзошли все ожидания! Получилось очень реалистично,
+              а результат прислали действительно быстро.
+            </p>
+            <div class="stars">★★★★★</div>
+          </article>
+
+          <article class="review reveal">
+            <div class="review-head">
+              <img
+                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80"
+                alt="Дмитрий"
+              >
+              <div>
+                <h3>Дмитрий С.</h3>
+                <small>Ultra Cinema</small>
+              </div>
+            </div>
+            <p>
+              Заказал аватарки для социальных сетей. Детали, свет и качество
+              выглядят как настоящая дорогая фотосессия.
+            </p>
+            <div class="stars">★★★★★</div>
+          </article>
+
+          <article class="review reveal">
+            <div class="review-head">
+              <img
+                src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=150&q=80"
+                alt="Екатерина"
+              >
+              <div>
+                <h3>Екатерина М.</h3>
+                <small>Реставрация</small>
+              </div>
+            </div>
+            <p>
+              Восстановили старую фотографию моей бабушки. Снимок стал чётким,
+              но сохранил свою атмосферу. Спасибо!
+            </p>
+            <div class="stars">★★★★★</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="contact-card reveal">
+      <p class="eyebrow">Связаться со мной</p>
+      <h2>Мои контакты</h2>
+
+      <p class="contact-description">
+        Для заказа AI-фотографий напишите мне в мессенджере MAX
+        или отправьте письмо на электронную почту.
+      </p>
+
+      <div class="contact-list">
+        <a
+          class="contact-item"
+          href="https://max.ru/u/f9LHodD0cOJdgeM94unkzSxKnbY3GQVCOsBzh9ol17ACXw57NetUxlas3BQ"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="contact-icon">M</span>
+
+          <span>
+            <small>Мессенджер MAX</small>
+            <strong>+7 909 601-81-97</strong>
+          </span>
+        </a>
+
+        <a
+          class="contact-item"
+          href="mailto:gost84@yandex.ru"
+        >
+          <span class="contact-icon">✉</span>
+
+          <span>
+            <small>Электронная почта</small>
+            <strong>gost84@yandex.ru</strong>
+          </span>
+        </a>
+      </div>
+
+      <p class="contact-owner">
+        Контактное лицо: <strong>gost84</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      © <span id="year"></span> AI·FOTO — нейрофотографии нового поколения
+    </div>
+  </footer>
+
+  
+<script>
+  const menuButton = document.getElementById("menuButton");
+  const navLinks = document.getElementById("navLinks");
+
+  menuButton.addEventListener("click", function () {
+    const isOpen = navLinks.classList.toggle("open");
+
+    menuButton.textContent = isOpen ? "×" : "☰";
+    menuButton.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  document.querySelectorAll(".nav-links a").forEach(function (link) {
+    link.addEventListener("click", function () {
+      navLinks.classList.remove("open");
+      menuButton.textContent = "☰";
+      menuButton.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  const observer = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.12
+    }
+  );
+
+  document.querySelectorAll(".reveal").forEach(function (element) {
+    observer.observe(element);
+  });
+
+  document.getElementById("year").textContent =
+    new Date().getFullYear();
+</script>
+
+
+
+
+
+</body>
+</html>
